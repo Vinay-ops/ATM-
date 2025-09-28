@@ -29,10 +29,3 @@ It provides a **Login Page** and a **Main Page** with options to:
 - MySQL / SQL Database  
 
 ---
-
-## 🗄️ Database Schema
-
-### Create Database
-```sql
-CREATE DATABASE ATM_DB;
-USE ATM_DB;
