@@ -1,169 +1,147 @@
 import javax.swing.*;
 import java.awt.*;
-import java.sql.*;
 
 public class ATMApp extends JFrame {
     private JTextField accField;
     private JTextArea resultArea;
-    private int loginPin;
-    private Connection con;
+    private int pin;
+    private BankService bank;
+
+    private static final Color DARK_BLUE = new Color(10, 20, 70);
+    private static final Color BTN_BLUE = new Color(70, 130, 180);
+    private static final Color WHITE = Color.WHITE;
 
     public ATMApp(int pin) {
-        loginPin = pin;
+        this.pin = pin;
+        this.bank = new BankService(pin);
 
-        // Database connection
-        try {
-            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/vinay", "root", "vinay");
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "Database connection failed: " + e.getMessage());
-            return;
-        }
-
-        setTitle("ATM Simulator");
-        setSize(700, 800);
+        setTitle("JVC BANK ATM");
+        setSize(950, 650);
         setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new BorderLayout(15, 15));
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
 
-        // Header
-        JLabel header = new JLabel("💳 ATM Simulator", SwingConstants.CENTER);
-        header.setFont(new Font("Arial", Font.BOLD, 30));
-        header.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
-        add(header, BorderLayout.NORTH);
+        // Main panel with background image
+        JPanel mainPanel = new JPanel(new BorderLayout()) {
+            private final Image bg = new ImageIcon("C:\\Users\\Vinay Bhogal\\OneDrive - Mahavir Education Trust\\Desktop\\Java\\Bank System\\src\\ATM.png").getImage();
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
+            }
+        };
+        mainPanel.setOpaque(false);
+        setContentPane(mainPanel);
 
-        // Account info panel
-        JPanel accountPanel = new JPanel();
-        accountPanel.setLayout(new BoxLayout(accountPanel, BoxLayout.Y_AXIS));
-        accountPanel.setBorder(BorderFactory.createTitledBorder("Account Info"));
-        accountPanel.setBackground(new Color(230, 230, 250)); // light lavender
+        // Spacer panel to move content down
+        JPanel centerWrapper = new JPanel(new BorderLayout());
+        centerWrapper.setOpaque(false);
+        centerWrapper.setBorder(BorderFactory.createEmptyBorder(100, 50, 50, 50)); // move down
 
-        JPanel accNoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 10));
-        accNoPanel.add(new JLabel("Account No:"));
-        accField = new JTextField(20);
-        accField.setEditable(false);
-        accNoPanel.add(accField);
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        splitPane.setLeftComponent(makeAccPanel());
+        splitPane.setRightComponent(makeResultPanel());
+        splitPane.setDividerLocation(400);
+        splitPane.setResizeWeight(0.5);
+        splitPane.setOpaque(false);
 
-        accountPanel.add(accNoPanel);
-        add(accountPanel, BorderLayout.CENTER);
+        centerWrapper.add(splitPane, BorderLayout.CENTER);
+        mainPanel.add(centerWrapper, BorderLayout.CENTER);
 
-        // Buttons panel
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new GridLayout(2, 2, 20, 20));
-        buttonPanel.setBorder(BorderFactory.createTitledBorder("Actions"));
+        mainPanel.add(makeBtnPanel(), BorderLayout.SOUTH);
 
-        JButton balanceBtn = new JButton("Check Balance");
-        JButton withdrawBtn = new JButton("Withdraw");
-        JButton depositBtn = new JButton("Deposit");
-        JButton exitBtn = new JButton("Exit");
-
-        balanceBtn.setFont(new Font("Arial", Font.BOLD, 18));
-        withdrawBtn.setFont(new Font("Arial", Font.BOLD, 18));
-        depositBtn.setFont(new Font("Arial", Font.BOLD, 18));
-        exitBtn.setFont(new Font("Arial", Font.BOLD, 18));
-
-        buttonPanel.add(balanceBtn);
-        buttonPanel.add(withdrawBtn);
-        buttonPanel.add(depositBtn);
-        buttonPanel.add(exitBtn);
-
-        add(buttonPanel, BorderLayout.SOUTH);
-
-        // Result area
-        resultArea = new JTextArea(10, 40);
-        resultArea.setEditable(false);
-        resultArea.setFont(new Font("Monospaced", Font.PLAIN, 16));
-        resultArea.setBorder(BorderFactory.createTitledBorder("Result"));
-        JScrollPane scroll = new JScrollPane(resultArea);
-        add(scroll, BorderLayout.EAST);
-
-        // Load account info automatically
-        loadAccountInfo();
-
-        // Button actions
-        balanceBtn.addActionListener(e -> showBalance());
-        withdrawBtn.addActionListener(e -> performTransaction("withdraw"));
-        depositBtn.addActionListener(e -> performTransaction("deposit"));
-        exitBtn.addActionListener(e -> {
-            try { if (con != null) con.close(); } catch (Exception ignored) {}
-            System.exit(0);
-        });
-
+        loadAccInfo();
         setVisible(true);
     }
 
-    private void loadAccountInfo() {
-        try {
-            PreparedStatement stmt = con.prepareStatement("SELECT acc_no FROM account WHERE pin = ?");
-            stmt.setInt(1, loginPin);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                accField.setText(String.valueOf(rs.getInt("acc_no")));
-                showBalance(); // automatically display name and balance
-            } else {
-                resultArea.setText("❌ Account not found for PIN " + loginPin);
-            }
-            rs.close();
-            stmt.close();
-        } catch (SQLException ex) {
-            resultArea.setText("⚠ Error: " + ex.getMessage());
-        }
+    private JPanel makeAccPanel() {
+        JPanel accPanel = new JPanel();
+        accPanel.setBackground(new Color(0, 0, 0, 0));
+        accPanel.setLayout(new BoxLayout(accPanel, BoxLayout.Y_AXIS));
+
+        JPanel accNoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 20));
+        accNoPanel.setOpaque(false);
+
+        JLabel label = new JLabel("Account Number:");
+        label.setForeground(Color.WHITE);
+        accNoPanel.add(label);
+
+        accField = new JTextField(15);
+        accField.setEditable(false);
+        accField.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        accField.setBackground(new Color(220, 220, 220, 180));
+        accNoPanel.add(accField);
+
+        accPanel.add(accNoPanel);
+        return accPanel;
     }
 
-    private void showBalance() {
-        try {
-            int acc_no = Integer.parseInt(accField.getText());
-            PreparedStatement stmt = con.prepareStatement("SELECT name, balance FROM account WHERE acc_no = ? AND pin = ?");
-            stmt.setInt(1, acc_no);
-            stmt.setInt(2, loginPin);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                resultArea.setText("👤 Account Holder: " + rs.getString("name") + "\n");
-                resultArea.append("💰 Current Balance: " + rs.getDouble("balance"));
-            } else {
-                resultArea.setText("❌ Wrong PIN or account not found!");
-            }
-            rs.close();
-            stmt.close();
-        } catch (SQLException ex) {
-            resultArea.setText("⚠ Error: " + ex.getMessage());
-        }
+    private JScrollPane makeResultPanel() {
+        resultArea = new JTextArea(18, 35);
+        resultArea.setEditable(false);
+        resultArea.setFont(new Font("Consolas", Font.PLAIN, 16));
+        resultArea.setForeground(WHITE);
+        resultArea.setBackground(new Color(0,0,0,0));
+
+        JScrollPane scroll = new JScrollPane(resultArea);
+        scroll.getViewport().setOpaque(false);
+        scroll.setOpaque(false);
+        return scroll;
     }
 
-    private void performTransaction(String type) {
-        try {
-            int acc_no = Integer.parseInt(accField.getText());
-            String input = JOptionPane.showInputDialog(this, "Enter amount:");
-            if (input == null || input.trim().isEmpty()) return;
-            double amount = Double.parseDouble(input.trim());
+    private JPanel makeBtnPanel() {
+        JPanel btnPanel = new JPanel(new GridBagLayout());
+        btnPanel.setOpaque(false);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 20, 10, 20);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridx = 0;
+        gbc.weightx = 1;
 
-            String query;
-            if (type.equals("withdraw")) {
-                query = "UPDATE account SET balance = balance - ? WHERE acc_no = ? AND pin = ? AND balance >= ?";
-            } else {
-                query = "UPDATE account SET balance = balance + ? WHERE acc_no = ? AND pin = ?";
+        String[] btnNames = {"Check Balance", "Withdraw", "Deposit", "Mini Statement", "Exit"};
+        for (int i = 0; i < btnNames.length; i++) {
+            JButton btn = makeBtn(btnNames[i]);
+            int row = i / 3; // 3 buttons per row
+            int col = i % 3;
+            gbc.gridx = col;
+            gbc.gridy = row;
+            btnPanel.add(btn, gbc);
+
+            // Actions
+            switch (btnNames[i]) {
+                case "Check Balance" -> btn.addActionListener(e -> resultArea.setText(bank.getBalance(accField.getText())));
+                case "Withdraw" -> btn.addActionListener(e -> {
+                    String input = JOptionPane.showInputDialog(this, "Enter withdrawal amount:");
+                    if (input != null) resultArea.setText(bank.withdraw(accField.getText(), Double.parseDouble(input)));
+                });
+                case "Deposit" -> btn.addActionListener(e -> {
+                    String input = JOptionPane.showInputDialog(this, "Enter deposit amount:");
+                    if (input != null) resultArea.setText(bank.deposit(accField.getText(), Double.parseDouble(input)));
+                });
+                case "Mini Statement" -> btn.addActionListener(e -> resultArea.setText(bank.getMiniStatement(accField.getText())));
+                case "Exit" -> btn.addActionListener(e -> System.exit(0));
             }
-
-            PreparedStatement stmt = con.prepareStatement(query);
-            stmt.setDouble(1, amount);
-            stmt.setInt(2, acc_no);
-            stmt.setInt(3, loginPin);
-            if (type.equals("withdraw")) stmt.setDouble(4, amount);
-
-            int rows = stmt.executeUpdate();
-            if (rows > 0) {
-                resultArea.setText("✅ " + (type.equals("withdraw") ? "Withdrawal" : "Deposit") + " successful!\n");
-                showBalance();
-            } else {
-                resultArea.setText("❌ Transaction failed! (Wrong PIN or insufficient balance)");
-            }
-
-            stmt.close();
-        } catch (Exception ex) {
-            resultArea.setText("⚠ Error: " + ex.getMessage());
         }
+
+        return btnPanel;
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new ATMApp(2006)); // Example PIN, replace with actual
+    private JButton makeBtn(String text) {
+        JButton btn = new JButton(text);
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        btn.setForeground(Color.WHITE);
+        btn.setBackground(BTN_BLUE);
+        btn.setFocusPainted(false);
+        btn.setPreferredSize(new Dimension(200, 50));
+        return btn;
+    }
+
+    private void loadAccInfo() {
+        String accNo = bank.getAccountNo();
+        if (accNo != null) {
+            accField.setText(accNo);
+            resultArea.setText(bank.getBalance(accNo));
+        } else {
+            resultArea.setText("Account not found for PIN: " + pin);
+        }
     }
 }
