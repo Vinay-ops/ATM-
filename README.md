@@ -70,26 +70,6 @@ text
 
 ---
 
-## 🔍 Example SQL Queries
-
--- Insert a new account
-INSERT INTO account (acc_no, name, pin, balance) VALUES (1, 'John Doe', 1234, 5000.00);
-
--- Deposit Money (Update balance)
-UPDATE account SET balance = balance + 1000 WHERE acc_no = 1;
-
--- Withdraw Money (with check)
-UPDATE account SET balance = balance - 500 WHERE acc_no = 1 AND balance >= 500;
-
--- Fetch Last 5 Transactions (Mini Statement)
-SELECT * FROM transactions WHERE acc_no = 1 ORDER BY date DESC LIMIT 5;
-
--- Check Notes Inventory
-SELECT * FROM notes_inventory ORDER BY last_updated DESC LIMIT 1;
-
-text
-
----
 
 ## 🚀 Getting Started
 
