@@ -21,6 +21,22 @@ It provides a **Login Page** and a **Main Page** with options to:
 
 ---
 
+## 📸 Screenshots
+
+<p align="center">
+  <img src="ATMGIT/Login.png" width="200" />
+  <img src="ATMGIT/Dashboard.png" width="200" />
+  </p>
+
+<p align="center">
+  <b>Login</b> &nbsp;&nbsp;&nbsp;
+  <b>Dashboard</b> &nbsp;&nbsp;&nbsp;
+  
+</p>
+
+
+---
+
 ## 🏗️ Technologies Used
 - Java (JDK 8 or above)  
 - IntelliJ IDEA (IDE)  
