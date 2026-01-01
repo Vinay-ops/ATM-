@@ -14,31 +14,41 @@ public class UIBANKSERVICE extends JFrame {
 
     public UIBANKSERVICE(int pinNum) {
         setTitle("JVC Bank Service Portal");
-        setSize(1000, 650);
+        setSize(1100, 700); // Slightly larger for dashboard feel
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        setLayout(new BorderLayout(15, 15));
-        getContentPane().setBackground(new Color(240, 242, 247));
+        setLayout(new BorderLayout());
+        
+        // Main Content Background
+        getContentPane().setBackground(new Color(244, 247, 254)); // Soft Blue-Grey
 
+        // --- Header Section ---
         JPanel header = new JPanel(new BorderLayout());
-        header.setBackground(new Color(25, 42, 86));
-        header.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
+        header.setBackground(Color.WHITE);
+        header.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(230, 230, 230)));
+        header.setPreferredSize(new Dimension(0, 70));
+        
+        // Header Title
+        JLabel title = new JLabel("  Dashboard", SwingConstants.LEFT);
+        title.setForeground(new Color(33, 43, 54));
+        title.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        title.setBorder(BorderFactory.createEmptyBorder(0, 25, 0, 0));
+        header.add(title, BorderLayout.WEST);
 
-        JLabel title = new JLabel("JVC Bank Service Portal", SwingConstants.CENTER);
-        title.setForeground(Color.WHITE);
-        title.setFont(new Font("Segoe UI", Font.BOLD, 28));
-        header.add(title, BorderLayout.CENTER);
-
-        accInfoLabel = new JLabel("Not logged in", SwingConstants.CENTER);
-        accInfoLabel.setForeground(new Color(200, 210, 220));
-        accInfoLabel.setFont(new Font("Segoe UI", Font.PLAIN, 15));
-        accInfoLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
-        header.add(accInfoLabel, BorderLayout.SOUTH);
+        // Header User Info
+        accInfoLabel = new JLabel("Not logged in  ", SwingConstants.RIGHT);
+        accInfoLabel.setForeground(new Color(100, 110, 120));
+        accInfoLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        accInfoLabel.setIcon(new ImageIcon()); // Placeholder for user icon if needed
+        accInfoLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 25));
+        header.add(accInfoLabel, BorderLayout.EAST);
+        
         add(header, BorderLayout.NORTH);
 
-        JPanel mainPanel = new JPanel(new BorderLayout(20, 20));
-        mainPanel.setBackground(new Color(240, 242, 247));
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        // --- Main Content Section ---
+        JPanel mainPanel = new JPanel(new BorderLayout(30, 30));
+        mainPanel.setBackground(new Color(244, 247, 254));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
         add(mainPanel, BorderLayout.CENTER);
 
         JPanel leftPanel = createAmountPanel();
@@ -47,8 +57,7 @@ public class UIBANKSERVICE extends JFrame {
         JPanel centerPanel = createOutputPanel();
         mainPanel.add(centerPanel, BorderLayout.CENTER);
 
-        JPanel actionsPanel = createActionsPanel();
-        add(actionsPanel, BorderLayout.SOUTH);
+        add(createSidebar(), BorderLayout.WEST);
 
         connectAccount(pinNum);
         setVisible(true);
@@ -64,38 +73,36 @@ public class UIBANKSERVICE extends JFrame {
     }
 
     private JPanel createAmountPanel() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BorderLayout());
-        panel.setPreferredSize(new Dimension(220, 0));
+        JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(Color.WHITE);
+        // Clean card look
         panel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(220, 225, 230), 1),
-                BorderFactory.createEmptyBorder(20, 20, 20, 20)
+            BorderFactory.createMatteBorder(0, 0, 2, 0, new Color(230, 230, 230)),
+            BorderFactory.createEmptyBorder(25, 25, 25, 25)
         ));
 
-        JLabel titleLabel = new JLabel("Transaction Amount");
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        titleLabel.setForeground(new Color(60, 70, 80));
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
+        JLabel titleLabel = new JLabel("Transaction Input");
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        titleLabel.setForeground(new Color(33, 43, 54));
         panel.add(titleLabel, BorderLayout.NORTH);
 
-        JPanel inputContainer = new JPanel(new BorderLayout(8, 12));
-        inputContainer.setBackground(Color.WHITE);
+        JPanel content = new JPanel(new GridLayout(4, 1, 0, 20));
+        content.setOpaque(false);
+        content.setBorder(BorderFactory.createEmptyBorder(25, 0, 0, 0));
 
-        JLabel amountLabel = new JLabel("Amount (Rs)");
-        amountLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        amountLabel.setForeground(new Color(90, 100, 110));
-        inputContainer.add(amountLabel, BorderLayout.NORTH);
+        JLabel lbl = new JLabel("Enter Amount");
+        lbl.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        lbl.setForeground(new Color(100, 116, 139));
+        content.add(lbl);
 
         amountField = createStyledTextField();
-        inputContainer.add(amountField, BorderLayout.CENTER);
+        content.add(amountField);
 
-        JButton clearBtn = createStyledButton("Clear All", new Color(220, 60, 60));
+        JButton clearBtn = createStyledButton("Clear Fields", new Color(239, 68, 68)); // Red-500
         clearBtn.addActionListener(e -> clearFields());
-        inputContainer.add(clearBtn, BorderLayout.SOUTH);
+        content.add(clearBtn);
 
-        panel.add(inputContainer, BorderLayout.CENTER);
-
+        panel.add(content, BorderLayout.CENTER);
         return panel;
     }
 
@@ -103,141 +110,151 @@ public class UIBANKSERVICE extends JFrame {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(Color.WHITE);
         panel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(220, 225, 230), 1),
-                BorderFactory.createEmptyBorder(20, 25, 25, 25)
+            BorderFactory.createMatteBorder(0, 0, 2, 0, new Color(230, 230, 230)),
+            BorderFactory.createEmptyBorder(25, 25, 25, 25)
         ));
 
-        JLabel titleLabel = new JLabel("Transaction Details");
+        JLabel titleLabel = new JLabel("Status & History");
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        titleLabel.setForeground(new Color(60, 70, 80));
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
+        titleLabel.setForeground(new Color(33, 43, 54));
         panel.add(titleLabel, BorderLayout.NORTH);
 
         outputArea = new JTextArea();
         outputArea.setEditable(false);
-        outputArea.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        outputArea.setFont(new Font("Consolas", Font.PLAIN, 14));
         outputArea.setBackground(new Color(248, 250, 252));
-        outputArea.setForeground(new Color(40, 50, 60));
-        outputArea.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        outputArea.setForeground(new Color(51, 65, 85));
         outputArea.setLineWrap(true);
         outputArea.setWrapStyleWord(true);
+        outputArea.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
         JScrollPane scrollPane = new JScrollPane(outputArea);
-        scrollPane.setBorder(BorderFactory.createLineBorder(new Color(230, 235, 240), 1));
-        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setBorder(BorderFactory.createLineBorder(new Color(226, 232, 240)));
+        scrollPane.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0));
+        
         panel.add(scrollPane, BorderLayout.CENTER);
-
         return panel;
     }
 
-    private JPanel createActionsPanel() {
-        JPanel panel = new JPanel(new GridLayout(1, 6, 15, 0));
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        panel.setBackground(new Color(240, 242, 247));
+    private JPanel createSidebar() {
+        JPanel sidebar = new JPanel();
+        sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
+        sidebar.setBackground(new Color(30, 41, 59)); // Slate Dark
+        sidebar.setPreferredSize(new Dimension(260, 0)); // Slightly wider
+        sidebar.setBorder(BorderFactory.createEmptyBorder(40, 0, 20, 0));
 
-        JButton balBtn = createActionButton("Check Balance");
-        JButton depBtn = createActionButton("Deposit");
-        JButton witBtn = createActionButton("Withdraw");
-        JButton noteBtn = createActionButton("Withdraw Notes");
-        JButton miniBtn = createActionButton("Mini Statement");
-        JButton exitBtn = createActionButton("Exit");
-        exitBtn.setBackground(new Color(200, 70, 70));
+        // Logo Area
+        JLabel logo = new JLabel("\uD83C\uDFE6 JVC Bank");
+        logo.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        logo.setForeground(Color.WHITE);
+        logo.setAlignmentX(Component.CENTER_ALIGNMENT);
+        sidebar.add(logo);
+        sidebar.add(Box.createRigidArea(new Dimension(0, 60)));
 
-        balBtn.addActionListener(e -> checkBalance());
-        depBtn.addActionListener(e -> depositMoney());
-        witBtn.addActionListener(e -> withdrawMoney());
-        noteBtn.addActionListener(e -> withdrawWithNotes());
-        miniBtn.addActionListener(e -> miniStatement());
-        exitBtn.addActionListener(e -> System.exit(0));
+        // Menu Items
+        addSidebarButton(sidebar, "Check Balance", "\uD83D\uDCB0", e -> checkBalance());
+        addSidebarButton(sidebar, "Deposit", "\uD83D\uDCE5", e -> depositMoney());
+        addSidebarButton(sidebar, "Withdraw", "\uD83D\uDCE4", e -> withdrawMoney());
+        addSidebarButton(sidebar, "Withdraw Notes", "\uD83D\uDCB5", e -> withdrawWithNotes());
+        addSidebarButton(sidebar, "Mini Statement", "\uD83D\uDCC4", e -> miniStatement());
+        
+        sidebar.add(Box.createVerticalGlue());
+        
+        // Separator
+        JSeparator sep = new JSeparator();
+        sep.setMaximumSize(new Dimension(200, 1));
+        sep.setForeground(new Color(71, 85, 105));
+        sep.setAlignmentX(Component.CENTER_ALIGNMENT);
+        sidebar.add(sep);
+        sidebar.add(Box.createRigidArea(new Dimension(0, 20)));
 
-        panel.add(balBtn);
-        panel.add(depBtn);
-        panel.add(witBtn);
-        panel.add(noteBtn);
-        panel.add(miniBtn);
-        panel.add(exitBtn);
+        addSidebarButton(sidebar, "Logout", "\uD83D\uDEAA", e -> {
+            dispose();
+            new LoginPage();
+        });
 
-        return panel;
+        return sidebar;
+    }
+
+    private void addSidebarButton(JPanel sidebar, String text, String icon, java.awt.event.ActionListener action) {
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 25, 12));
+        btnPanel.setBackground(new Color(30, 41, 59));
+        btnPanel.setMaximumSize(new Dimension(260, 55));
+        btnPanel.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        JLabel iconLabel = new JLabel(icon);
+        iconLabel.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 22));
+        iconLabel.setForeground(new Color(148, 163, 184)); // Slate 400
+
+        JLabel textLabel = new JLabel(text);
+        textLabel.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        textLabel.setForeground(new Color(148, 163, 184));
+
+        btnPanel.add(iconLabel);
+        btnPanel.add(textLabel);
+
+        btnPanel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                btnPanel.setBackground(new Color(51, 65, 85)); // Slate 700
+                iconLabel.setForeground(Color.WHITE);
+                textLabel.setForeground(Color.WHITE);
+                // Add left border highlight
+                btnPanel.setBorder(BorderFactory.createMatteBorder(0, 4, 0, 0, new Color(59, 130, 246))); // Blue accent
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                btnPanel.setBackground(new Color(30, 41, 59));
+                iconLabel.setForeground(new Color(148, 163, 184));
+                textLabel.setForeground(new Color(148, 163, 184));
+                btnPanel.setBorder(null);
+            }
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                action.actionPerformed(null);
+            }
+        });
+
+        sidebar.add(btnPanel);
+        sidebar.add(Box.createRigidArea(new Dimension(0, 8)));
     }
 
     private JTextField createStyledTextField() {
         JTextField field = new JTextField();
-        field.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        field.setPreferredSize(new Dimension(180, 38));
+        field.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        field.setPreferredSize(new Dimension(100, 45));
         field.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(200, 210, 220), 2),
-                BorderFactory.createEmptyBorder(8, 12, 8, 12)
+                BorderFactory.createEmptyBorder(5, 10, 5, 10)
         ));
-        field.setBackground(new Color(250, 252, 255));
-        field.setForeground(new Color(40, 50, 60));
-
+        
         field.addFocusListener(new FocusListener() {
             public void focusGained(FocusEvent e) {
                 field.setBorder(BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(new Color(72, 133, 237), 2),
-                        BorderFactory.createEmptyBorder(8, 12, 8, 12)
+                        BorderFactory.createLineBorder(new Color(52, 152, 219), 2),
+                        BorderFactory.createEmptyBorder(5, 10, 5, 10)
                 ));
             }
-
             public void focusLost(FocusEvent e) {
                 field.setBorder(BorderFactory.createCompoundBorder(
                         BorderFactory.createLineBorder(new Color(200, 210, 220), 2),
-                        BorderFactory.createEmptyBorder(8, 12, 8, 12)
+                        BorderFactory.createEmptyBorder(5, 10, 5, 10)
                 ));
             }
         });
-
         return field;
     }
-
+    
     private JButton createStyledButton(String text, Color bgColor) {
         JButton btn = new JButton(text);
-        btn.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        btn.setPreferredSize(new Dimension(180, 35));
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 14));
         btn.setBackground(bgColor);
         btn.setForeground(Color.WHITE);
         btn.setFocusPainted(false);
         btn.setBorderPainted(false);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btn.setOpaque(true);
-
-        btn.addMouseListener(new MouseAdapter() {
-            final Color originalColor = btn.getBackground();
-
-            public void mouseEntered(MouseEvent e) {
-                btn.setBackground(originalColor.darker());
-            }
-
-            public void mouseExited(MouseEvent e) {
-                btn.setBackground(originalColor);
-            }
-        });
-
-        return btn;
-    }
-
-    private JButton createActionButton(String text) {
-        JButton btn = new JButton(text);
-        btn.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        btn.setPreferredSize(new Dimension(150, 50));
-        btn.setBackground(new Color(72, 133, 237));
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setBorderPainted(false);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btn.setOpaque(true);
-
-        btn.addMouseListener(new MouseAdapter() {
-            public void mouseEntered(MouseEvent e) {
-                btn.setBackground(new Color(58, 110, 200));
-            }
-
-            public void mouseExited(MouseEvent e) {
-                btn.setBackground(new Color(72, 133, 237));
-            }
-        });
-
         return btn;
     }
 
@@ -247,13 +264,15 @@ public class UIBANKSERVICE extends JFrame {
             accNo = bankService.getAccountNo();
             if (accNo != null) {
                 String details = bankService.getAccountInfo();
-                accInfoLabel.setText(details);
-                outputArea.setText("Welcome to Bank Service Portal!\n\n" + details + "\n\nPlease select a service from the options below.");
+                if (accInfoLabel != null) accInfoLabel.setText("User: " + details.split("\n")[0]); // Simplified for header
+                outputArea.setText("Welcome Back!\n\n" + details);
             } else {
-                JOptionPane.showMessageDialog(this, "Invalid PIN or account not found!", "Authentication Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Invalid PIN or account not found!", "Error", JOptionPane.ERROR_MESSAGE);
+                dispose();
+                new LoginPage();
             }
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error connecting to account!", "Connection Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Connection Error", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -319,7 +338,12 @@ public class UIBANKSERVICE extends JFrame {
     private void updateAccountInfo() {
         if (bankService != null && accNo != null) {
             String details = bankService.getAccountInfo();
-            accInfoLabel.setText(details);
+            // Update header with just the name or account number if possible
+            if (accInfoLabel != null) {
+                // Assuming details starts with "Name: ..." or similar
+                String firstLine = details.split("\n")[0];
+                accInfoLabel.setText("User: " + firstLine);
+            }
         }
     }
 
