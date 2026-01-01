@@ -25,7 +25,7 @@ It provides a **Login Page** and a **Main Page** with options to:
 
 <p align="center">
   <img src="ATMGIT/Login.png" width="200" />
-  <img src="ATMGIT/Dashboard.png" width="200" />
+  <img src="ATMGIT/Dashboard.png" width="500" height = "500" />
   </p>
 
 <p align="center">
